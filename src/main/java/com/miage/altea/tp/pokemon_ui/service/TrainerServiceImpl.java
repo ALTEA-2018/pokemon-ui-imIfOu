@@ -36,6 +36,8 @@ public class TrainerServiceImpl implements TrainerService{
     }
 
     @Override
+    @Retryable
+    @Cacheable("trainers")
     public List<Trainer> listTrainers() {
         List<Trainer> trainers =  Arrays.asList(restTemplate.getForObject(trainerServiceUrl+"/trainers/", Trainer[].class));
         if(!CollectionUtils.isEmpty(trainers)){
