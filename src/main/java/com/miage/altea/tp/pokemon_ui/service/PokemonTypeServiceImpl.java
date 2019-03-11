@@ -20,6 +20,8 @@ public class PokemonTypeServiceImpl implements PokemonTypeService{
     private String pokemonServiceUrl;
 
     @Override
+    @Retryable
+    @Cacheable("pokemon-types")
     public List<PokemonType> listPokemonsTypes() {
         return Arrays.asList(restTemplate.getForObject(pokemonServiceUrl+"/pokemon-types/", PokemonType[].class));
     }
