@@ -1,7 +1,5 @@
 package com.miage.altea.tp.pokemon_ui.bo;
 
-import com.fasterxml.jackson.annotation.JsonSetter;
-
 import java.util.List;
 
 public class PokemonType {

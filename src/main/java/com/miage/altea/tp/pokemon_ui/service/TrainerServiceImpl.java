@@ -5,11 +5,15 @@ import com.miage.altea.tp.pokemon_ui.bo.PokemonType;
 import com.miage.altea.tp.pokemon_ui.bo.Trainer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -33,12 +37,23 @@ public class TrainerServiceImpl implements TrainerService{
 
     @Override
     public List<Trainer> listTrainers() {
-        return Arrays.asList(restTemplate.getForObject(trainerServiceUrl+"/trainers/", Trainer[].class));
+        List<Trainer> trainers =  Arrays.asList(restTemplate.getForObject(trainerServiceUrl+"/trainers/", Trainer[].class));
+        if(!CollectionUtils.isEmpty(trainers)){
+            for(Trainer trainer: trainers) foundPokemonTypeForTrainer(trainer);
+        }
+        return trainers;
     }
 
     @Override
+    @Retryable
+    @Cacheable("trainers")
     public Trainer getTeamForTrainer(String name) {
         Trainer trainer = restTemplate.getForObject(trainerServiceUrl+"/trainers/"+name, Trainer.class);
+        foundPokemonTypeForTrainer(trainer);
+        return trainer;
+    }
+
+    private void foundPokemonTypeForTrainer(Trainer trainer){
         List<PokemonType> pokemonTypes = new ArrayList<>();
         for(Pokemon pokemon: trainer.getTeam()){
             PokemonType pokemonType = pokemonTypeService.findPokemonTypesById(pokemon.getPokemonType());
@@ -46,7 +61,6 @@ public class TrainerServiceImpl implements TrainerService{
             pokemonTypes.add(pokemonType);
         }
         trainer.setTeamPokemon(pokemonTypes);
-        return trainer;
     }
 
 

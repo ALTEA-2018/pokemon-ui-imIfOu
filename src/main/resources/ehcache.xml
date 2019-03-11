@@ -1,0 +1,18 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.ehcache.org/v3"
+        xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core-3.0.xsd">
+
+    <cache alias="pokemon-types">
+        <key-type>java.lang.Long</key-type>
+        <value-type>com.miage.altea.tp.pokemon_ui.bo.PokemonType</value-type>
+    </cache>
+
+    <cache alias="trainers">
+        <key-type>java.lang.String</key-type>
+        <value-type>com.miage.altea.tp.pokemon_ui.bo.Trainer</value-type>
+        <expiry>
+            <ttl unit="seconds">60</ttl>
+        </expiry>
+    </cache>
+
+</config>

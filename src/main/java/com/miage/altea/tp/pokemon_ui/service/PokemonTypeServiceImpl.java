@@ -3,6 +3,10 @@ package com.miage.altea.tp.pokemon_ui.service;
 import com.miage.altea.tp.pokemon_ui.bo.PokemonType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,8 +25,10 @@ public class PokemonTypeServiceImpl implements PokemonTypeService{
     }
 
     @Override
+    @Retryable
+    @Cacheable("pokemon-types")
     public PokemonType findPokemonTypesById(int id) {
-        return restTemplate.getForObject(pokemonServiceUrl+"/pokemon-types/"+id, PokemonType.class);
+        return restTemplate.getForObject(pokemonServiceUrl+"/pokemon-types/{id}", PokemonType.class,id);
     }
 
     @Autowired
