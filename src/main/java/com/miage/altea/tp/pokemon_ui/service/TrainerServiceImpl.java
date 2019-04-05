@@ -4,9 +4,13 @@ import com.miage.altea.tp.pokemon_ui.bo.Pokemon;
 import com.miage.altea.tp.pokemon_ui.bo.PokemonType;
 import com.miage.altea.tp.pokemon_ui.bo.Trainer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
@@ -26,6 +30,7 @@ public class TrainerServiceImpl implements TrainerService{
     private String trainerServiceUrl;
 
     @Autowired
+    @Qualifier("trainerApiRestTemplate")
     public void setRestTemplate(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
@@ -36,9 +41,7 @@ public class TrainerServiceImpl implements TrainerService{
     }
 
     @Override
-    @Retryable
-    @Cacheable("trainers")
-    public List<Trainer> listTrainers() {
+    public List<Trainer> getAllTrainers() {
         List<Trainer> trainers =  Arrays.asList(restTemplate.getForObject(trainerServiceUrl+"/trainers/", Trainer[].class));
         if(!CollectionUtils.isEmpty(trainers)){
             for(Trainer trainer: trainers) foundPokemonTypeForTrainer(trainer);
@@ -66,4 +69,10 @@ public class TrainerServiceImpl implements TrainerService{
     }
 
 
+    @Override
+    public Trainer loadUserByUsername(String s) throws UsernameNotFoundException {
+        Trainer trainer = restTemplate.getForObject(trainerServiceUrl+"/trainers/"+s, Trainer.class);
+        if(trainer == null) throw new BadCredentialsException("Invalid user");
+        return trainer;
+    }
 }
